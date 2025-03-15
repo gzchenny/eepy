@@ -2,7 +2,6 @@ import cv2
 import dlib
 import numpy as np
 from scipy.spatial import distance
-
 ### to do
 # CALIBRATION !!!!!!!!!!!!!!!!
 
@@ -106,6 +105,7 @@ def generate_frames():
                     blink_count += 1
                     if blink_count > 15:  # ADJUST THIS
                         cv2.putText(frame, "DROWSY! Wake up!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
+
                 else:
                     blink_count = 0
 

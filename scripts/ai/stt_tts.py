@@ -4,6 +4,7 @@ import tempfile
 import pygame
 import os
 
+#----------------- Speech to text -----------------#
 # Initialise the recognizer
 r = sr.Recognizer()
 
@@ -14,7 +15,7 @@ def record_audio():
         # connect user mic and listen to audio
         with sr.Microphone() as source:
             r.adjust_for_ambient_noise(source, duration=0.2)
-            audio = r.listen(source, timeout=5)
+            audio = r.listen(source)
             
             try:
                 # Converting user audio to text using google 
@@ -24,6 +25,8 @@ def record_audio():
                 print("Error: ", e)
                 return None
 
+
+#----------------- Text to Speech -----------------#
 """
 source: https://www.youtube.com/watch?v=3BMy5KPa_kQ 
 """

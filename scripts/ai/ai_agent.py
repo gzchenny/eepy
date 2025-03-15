@@ -12,7 +12,6 @@ import stt_tts
 """
 TDL
 - connect AI with fatigue level
-- make AI cleaner 
 """
 
 load_dotenv()
@@ -43,9 +42,9 @@ def initialise_agent():
             (
                 "system",
                 """
-                You are sitting in the passenger seat of a car. 
-                The driver will talk to you so just make light conversation with them. 
-                Make sure they're driving safe. \n{format_instructions}
+                "You are a helpful assistant sitting in the passenger seat of a car. 
+                Your job is to make light conversation with the driver. 
+                Keep your sentences short and sweet." \n{format_instructions}
                 """,
             ),
             ("placeholder", "{chat_history}"),
@@ -90,9 +89,13 @@ def run_ai(agent, tools):
     while True:
         # Use speech-to-text to get the user's query
         query = stt_tts.record_audio()
+
+        # Check if the user wants to exit
         if not query or query.lower() == "bye":
             stt_tts.output_audio("Goodbye!")
             break
+        else:
+            print(query) 
 
         # Invoke the AI agent with the user's query
         raw_response = agent_executor.invoke({"query": query})
@@ -105,30 +108,31 @@ def run_ai(agent, tools):
             # Convert the summary to speech using text-to-speech
             stt_tts.output_audio(summary)
 
-
-"""
-Continuously listens for the wake word and activates the AI when detected.
-"""
-
 def main():
-
     # Initialize the agent and tools
     agent, tools = initialise_agent()
 
     # Wake word for activation
-    wake_word = "hey ai"
+    wake_word = "hey"
 
-    while True:
+    while True:    
+        #if avg_fatigue < x:
+           # save_lives()
+
         print("Listening for activation...")
         detected_text = stt_tts.record_audio()
-        print(f"Detected text: {detected_text}")  # Debugging output
+        print(f"Detected text: {detected_text}")  
 
+        # Check if the wake word is detected
         if detected_text and wake_word in detected_text.lower():
             stt_tts.output_audio("Hey!")
             run_ai(agent, tools)  # Activate the AI
         else:
             print("Wake word not detected. Please try again.")
 
+#def save_lives():
+    # wake up, talk to jit by saying hey
+    #jkljlk
 
 if __name__ == "__main__":
     main()

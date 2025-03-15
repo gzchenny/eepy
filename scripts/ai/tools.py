@@ -2,6 +2,7 @@ from langchain_community.tools import WikipediaQueryRun, DuckDuckGoSearchRun
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain.tools import Tool
 
+
 # Use DDG to search the web for information
 search = DuckDuckGoSearchRun()
 search_tool = Tool(
