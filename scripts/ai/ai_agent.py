@@ -14,6 +14,7 @@ TDL
 - connect AI with fatigue level
 - make AI cleaner 
 """
+
 load_dotenv()
 
 # Define the response schema using Pydantic BaseModel
@@ -80,28 +81,16 @@ def process_response(raw_response):
         print("Error parsing response:", e)
         print("Raw Response:", raw_response)
         return None
-    
-# Main program functionality
-def main():
-   # Initialize the agent and tools
-    agent, tools = initialise_agent()
-    
-    # Voice activation
-    active = False
-    wake_word = "hey"
-    detected_text = stt_tts.record_audio()
-    if detected_text and wake_word in detected_text.lower():
-        active = True
-        stt_tts.output_audio("Hey!")
 
-    # main loop 
-    while active:
-        # Create an executor to run the agent with the tools
-        agent_executor = AgentExecutor(agent=agent, tools=tools)
+# Runs the main AI functionality after activation
+def run_ai(agent, tools):
+    # Create an executor to run the agent with the tools
+    agent_executor = AgentExecutor(agent=agent, tools=tools)
 
+    while True:
         # Use speech-to-text to get the user's query
         query = stt_tts.record_audio()
-        if not query or query == "bye":
+        if not query or query.lower() == "bye":
             stt_tts.output_audio("Goodbye!")
             break
 
@@ -116,7 +105,30 @@ def main():
             # Convert the summary to speech using text-to-speech
             stt_tts.output_audio(summary)
 
-    active = False
+
+"""
+Continuously listens for the wake word and activates the AI when detected.
+"""
+
+def main():
+
+    # Initialize the agent and tools
+    agent, tools = initialise_agent()
+
+    # Wake word for activation
+    wake_word = "hey ai"
+
+    while True:
+        print("Listening for activation...")
+        detected_text = stt_tts.record_audio()
+        print(f"Detected text: {detected_text}")  # Debugging output
+
+        if detected_text and wake_word in detected_text.lower():
+            stt_tts.output_audio("Hey!")
+            run_ai(agent, tools)  # Activate the AI
+        else:
+            print("Wake word not detected. Please try again.")
+
 
 if __name__ == "__main__":
     main()
