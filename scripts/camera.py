@@ -2,12 +2,9 @@ import cv2
 import dlib
 import numpy as np
 from scipy.spatial import distance
-<<<<<<< Updated upstream
-=======
 from flask_socketio import SocketIO
 
 socketio = SocketIO()
->>>>>>> Stashed changes
 ### to do
 # CALIBRATION !!!!!!!!!!!!!!!!
 
