@@ -5,6 +5,10 @@ import tempfile
 import pygame
 import os
 
+"""
+source: https://www.geeksforgeeks.org/python-convert-speech-to-text-and-text-to-speech/"
+"""
+
 # Initialise the recognizer
 r = sr.Recognizer()
 
@@ -26,6 +30,7 @@ def record_audio():
                 return None
 
 
+#----------------- Text to Speech -----------------#
 API_KEY = "sk_2a4636131ac359403267066a77a5142a16aa3f934dc63a87"
 DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"
 

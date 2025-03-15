@@ -14,6 +14,8 @@ TDL
 - set up voice activation and deactivation
 - connect AI with fatigue level
 - make AI cleaner 
+
+source: https://www.youtube.com/watch?v=bTMPwUgLZf0 
 """
 load_dotenv()
 
@@ -23,7 +25,6 @@ class ResearchResponse(BaseModel):
     summary: str
     sources: list[str]
     tools_used: list[str]
-
 
 # Function to initialise AI Agent
 def initialise_agent():
