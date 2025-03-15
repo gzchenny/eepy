@@ -4,3 +4,5 @@ pyttsx3
 dlib
 scipy
 python-dotenv
+flask
+flask-socketio
