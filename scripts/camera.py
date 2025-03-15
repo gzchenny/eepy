@@ -37,19 +37,30 @@ LEFT_EYE = [36, 37, 38, 39, 40, 41]
 RIGHT_EYE = [42, 43, 44, 45, 46, 47]
 MOUTH = [48, 50, 52, 54, 56, 58]
 
+# ear_value = 0
+# mar_value = 0
+data_store = {
+    "EAR": 0,
+    "MAR": 0,
+}
+
 # function to calculate Eye Aspect Ratio (EAR)
 def eye_aspect_ratio(eye):
     A = distance.euclidean(eye[1], eye[5])  # vertical
     B = distance.euclidean(eye[2], eye[4])  # vertical
     C = distance.euclidean(eye[0], eye[3])  # horizontal
-    return (A + B) / (2.0 * C)
+    ear = (A + B) / (2.0 * C)
+    data_store["EAR"] = ear
+    return ear
 
 # function to calculate Mouth Aspect Ratio (MAR)
 def mouth_aspect_ratio(mouth):
     A = distance.euclidean(mouth[1], mouth[5])  # vertical
     B = distance.euclidean(mouth[2], mouth[4])  # vertical
     C = distance.euclidean(mouth[0], mouth[3])  # horizontal
-    return (A + B) / (2.0 * C)
+    mar = (A + B) / (2.0 * C)
+    data_store["MAR"] = mar
+    return mar
 
 blink_count = 0
 yawn_count = 0

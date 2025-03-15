@@ -1,7 +1,6 @@
-from flask import Flask, render_template, Response
-from scripts.camera import generate_frames
+from flask import Flask, render_template, Response, jsonify
+from scripts.camera import generate_frames, data_store
 from flask_socketio import SocketIO
-import random
 import time
 import threading
 
@@ -13,10 +12,15 @@ socketio = SocketIO(app, cors_allowed_origins="*")  # Allow cross-origin for tes
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+# Route to get data
+@app.route('/data')
+def get_data():
+    return jsonify(data_store)
+
 def generate_data():
     while True:
-        data = {"value": random.randint(1, 100)}
-        print("Emitting data:", data)  # Print data to console for verification
+        data = {"EAR": data_store["EAR"], "MAR": data_store["MAR"]}  # GET MORE DATA
+        print("Emitting data:", data)
         socketio.emit("update_data", data)
         time.sleep(1)
 
