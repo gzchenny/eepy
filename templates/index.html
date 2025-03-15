@@ -3,43 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eepy Program</title>
+    <title>Drowsiness Detection</title>
     <style>
         body {
+            text-align: center;
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
+            background-color: #222;
+            color: white;
         }
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 1rem;
-            text-align: center;
+        h1 {
+            margin-top: 20px;
         }
-        main {
-            padding: 2rem;
-        }
-        footer {
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            padding: 1rem;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
+        img {
+            border: 5px solid white;
+            border-radius: 10px;
+            width: 60%;
+            max-width: 700px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to Eepy Program</h1>
-    </header>
-    <main>
-        <p>This is the main content area for the Eepy program.</p>
-    </main>
-    <footer>
-        <p>&copy; 2023 Eepy Program. All rights reserved.</p>
-    </footer>
+    <h1>Drowsiness Detection Live Stream</h1>
+    <img src="{{ url_for('video_feed') }}" alt="Video Stream">
 </body>
 </html>

@@ -3,3 +3,4 @@ opencv-python
 pyttsx3
 dlib
 scipy
+python-dotenv
