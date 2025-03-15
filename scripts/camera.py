@@ -27,7 +27,12 @@ detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(predictor_path)
 
 # indices for eye and mouth landmarks
-# CHECK IF INDICES ARE 0-INDEXED OR 1-INDEXED DEPENDING ON WHICH DIAGRAM
+
+# 1-indexed
+# LEFT_EYE = [37, 38, 39, 40, 41, 42]
+# RIGHT_EYE = [43, 44, 45, 46, 47, 48]
+# MOUTH = [50, 52, 54, 56, 58, 59]
+# 0-indexed
 LEFT_EYE = [36, 37, 38, 39, 40, 41]
 RIGHT_EYE = [42, 43, 44, 45, 46, 47]
 MOUTH = [48, 50, 52, 54, 56, 58]
@@ -85,10 +90,10 @@ while cap.isOpened():
             mar = mouth_aspect_ratio(mouth)
 
             # check if eyes are closed for too long
-            if ear < 0.40:  # threshold for closed eyes
+            if ear < 0.33:  # threshold for closed eyes
                 blink_count += 1
-                if blink_count > 5:  # if eyes are closed for too long
-                    cv2.putText(frame, "DROWSY! Wake Up!", (50, 100),
+                if blink_count > 25:  # if eyes are closed for too long
+                    cv2.putText(frame, "DROWSY! Wake up!", (50, 100),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
             else:
                 blink_count = 0  # reset blink count
@@ -97,7 +102,7 @@ while cap.isOpened():
             if mar > 0.6:  # threshold for yawning
                 yawn_count += 1
                 if yawn_count > 10:
-                    cv2.putText(frame, "Yawning! Take a Break!", (50, 150),
+                    cv2.putText(frame, "Yawning! Take a break!", (50, 150),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
             else:
                 yawn_count = 0  # reset yawn count
@@ -106,7 +111,7 @@ while cap.isOpened():
             for (x, y) in landmarks:
                 cv2.circle(frame, (x, y), 1, (0, 255, 0), -1)
 
-    cv2.imshow("Drowsiness Detection", frame)
+    cv2.imshow("EEPY", frame)
     
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
