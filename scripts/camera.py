@@ -51,70 +51,69 @@ def mouth_aspect_ratio(mouth):
     C = distance.euclidean(mouth[0], mouth[3])  # horizontal
     return (A + B) / (2.0 * C)
 
-# capturing video
-cap = cv2.VideoCapture(0)
 blink_count = 0
 yawn_count = 0
 
-while cap.isOpened():
-    ret, frame = cap.read()
-    if not ret:
-        break
+def generate_frames():
+    global blink_count, yawn_count
+    cap = cv2.VideoCapture(0)
+    while True:
+        success, frame = cap.read()
+        if not success:
+            break
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # convert frame to grayscale
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # convert frame to grayscale
+        h, w = frame.shape[:2]
 
-    # detecting face
-    h, w = frame.shape[:2]
-    blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), (104, 177, 123), False, False)
-    face_net.setInput(blob)
-    detections = face_net.forward()
+        # detecting face
+        blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), (104, 177, 123), False, False)
+        face_net.setInput(blob)
+        detections = face_net.forward()
 
-    for i in range(detections.shape[2]):
-        confidence = detections[0, 0, i, 2]
-        if confidence > 0.5:
-            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-            (x, y, x1, y1) = box.astype("int")
-            face_rect = dlib.rectangle(x, y, x1, y1)
+        for i in range(detections.shape[2]):
+            confidence = detections[0, 0, i, 2]
+            if confidence > 0.5:
+                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+                (x, y, x1, y1) = box.astype("int")
+                face_rect = dlib.rectangle(x, y, x1, y1)
 
-            # detecting landmarks
-            shape = predictor(gray, face_rect)
-            landmarks = np.array([[shape.part(i).x, shape.part(i).y] for i in range(68)])
+                # detecting landmarks facial landmarks
+                shape = predictor(gray, face_rect)
+                landmarks = np.array([[shape.part(i).x, shape.part(i).y] for i in range(68)])
 
-            # EAR calculation for blink detection
-            left_eye = landmarks[LEFT_EYE]
-            right_eye = landmarks[RIGHT_EYE]
-            ear = (eye_aspect_ratio(left_eye) + eye_aspect_ratio(right_eye)) / 2.0
+                # EAR calculation for blink detection
+                left_eye = landmarks[LEFT_EYE]
+                right_eye = landmarks[RIGHT_EYE]
+                ear = (eye_aspect_ratio(left_eye) + eye_aspect_ratio(right_eye)) / 2.0
 
-            # MAR calculation for yawning detection
-            mouth = landmarks[MOUTH]
-            mar = mouth_aspect_ratio(mouth)
+                # MAR calculation for yawning detection
+                mouth = landmarks[MOUTH]
+                mar = mouth_aspect_ratio(mouth)
 
-            # check if eyes are closed for too long
-            if ear < 0.33:  # threshold for closed eyes
-                blink_count += 1
-                if blink_count > 25:  # if eyes are closed for too long
-                    cv2.putText(frame, "DROWSY! Wake up!", (50, 100),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
-            else:
-                blink_count = 0  # reset blink count
+                # detecting drowsiness
+                if ear < 0.3:  # threshold
+                    blink_count += 1
+                    if blink_count > 15:  # ADJUST THIS
+                        cv2.putText(frame, "DROWSY! Wake up!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
+                else:
+                    blink_count = 0
 
-            # check if mouth is open for too long
-            if mar > 0.6:  # threshold for yawning
-                yawn_count += 1
-                if yawn_count > 10:
-                    cv2.putText(frame, "Yawning! Take a break!", (50, 150),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
-            else:
-                yawn_count = 0  # reset yawn count
+                # detecting yawning
+                if mar > 0.6:  # threshold
+                    yawn_count += 1
+                    if yawn_count > 10:  # ADJUST THIS
+                        cv2.putText(frame, "Yawning! Take a break!", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
+                else:
+                    yawn_count = 0
 
-            # draw face landmarks
-            for (x, y) in landmarks:
-                cv2.circle(frame, (x, y), 1, (0, 255, 0), -1)
+                # drawing landmarks
+                for (x, y) in landmarks:
+                    cv2.circle(frame, (x, y), 1, (0, 255, 0), -1)
 
-    cv2.imshow("EEPY", frame)
-    
-    if cv2.waitKey(1) & 0xFF == ord("q"):
-        break
+        # converting frame to bytes for streaming
+        _, buffer = cv2.imencode('.jpg', frame)
+        frame_bytes = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
-cap.release()
 cv2.destroyAllWindows()
