@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EEPY</title>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
         body {
             display: flex;
             justify-content: center;
@@ -14,34 +16,87 @@
             margin: 0;
             text-align: center;
             font-family: Arial, sans-serif;
-            background-color: #ffffff;
+            background-color: #000000;
             color: white;
         }
         h1 {
-            font-family: 'Pacifico', cursive;
-            color: rgba(126, 34, 255, 0.50);
+            font-family: 'Pixelify Sans';
+            color: rgb(255, 255, 255);
             font-size: 120px;
             font-style: normal;
             font-weight: 400;
             line-height: normal;
-            width: 412px; /* Added width */
-            height: 375px; /* Added height */
-            flex-shrink: 0; /* Added flex-shrink */
-            text-transform: lowercase; /* Make text lowercase */
+            text-align: center;
+            width: 412px;
+            height: 375px;
+            flex-shrink: 0;
+            text-transform: lowercase;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .img-container {
+            position: relative;
+            width: 90%;
+            max-width: 1050px;
+        }
+        .text-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 10px;
         }
         img {
-            border: 5px solid white;
+            border: 5px solid #850B4E;
             border-radius: 10px;
-            width: 60%;
-            max-width: 700px;
+            width: 100%;
+            max-width: 800px;
+        }
+        .ear-value, .mar-value {
+            -webkit-text-stroke-width: 1px;
+            -webkit-text-stroke-color: #FFF;
+            font-family: 'Poppins';
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+        }
+        .ear-value {
+            text-align: left;
+            font-size: 24px;
+        }
+        .mar-value {
+            text-align: right;
+            font-size: 24px;
+            color: #FFF;
+        }
+        .value-container {
+            display: flex;
+            align-items: center;
+        }
+        .value-label {
+            margin-right: 5px;
         }
     </style>
 </head>
 <body>
     <h1>EEPY</h1>
-    <img src="{{ url_for('video_feed') }}" alt="Video Stream">
-    <p>Latest EAR Value: <span id="ear_value">Waiting for data...</span></p>
-    <p>Latest MAR Value: <span id="mar_value">Waiting for data...</span></p>
+    <div class="container">
+        <div class="img-container">
+            <img src="{{ url_for('video_feed') }}" alt="Video Stream">
+        </div>
+        <div class="text-container">
+            <div class="value-container ear-value">
+                <span class="value-label">Latest EAR Value:</span>
+                <span id="ear_value">Waiting for data...</span>
+            </div>
+            <div class="value-container mar-value">
+                <span class="value-label">Latest MAR Value:</span>
+                <span id="mar_value">Waiting for data...</span>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>

@@ -2,6 +2,12 @@ import cv2
 import dlib
 import numpy as np
 from scipy.spatial import distance
+<<<<<<< Updated upstream
+=======
+from flask_socketio import SocketIO
+
+socketio = SocketIO()
+>>>>>>> Stashed changes
 ### to do
 # CALIBRATION !!!!!!!!!!!!!!!!
 
@@ -49,8 +55,7 @@ def eye_aspect_ratio(eye):
     B = distance.euclidean(eye[2], eye[4])  # vertical
     C = distance.euclidean(eye[0], eye[3])  # horizontal
     ear = (A + B) / (2.0 * C)
-    data_store["EAR"] = ear
-    return ear
+    return round(ear, 3)
 
 # function to calculate Mouth Aspect Ratio (MAR)
 def mouth_aspect_ratio(mouth):
@@ -58,8 +63,7 @@ def mouth_aspect_ratio(mouth):
     B = distance.euclidean(mouth[2], mouth[4])  # vertical
     C = distance.euclidean(mouth[0], mouth[3])  # horizontal
     mar = (A + B) / (2.0 * C)
-    data_store["MAR"] = mar
-    return mar
+    return round(mar, 3)
 
 blink_count = 0
 yawn_count = 0
@@ -95,10 +99,18 @@ def generate_frames():
                 left_eye = landmarks[LEFT_EYE]
                 right_eye = landmarks[RIGHT_EYE]
                 ear = (eye_aspect_ratio(left_eye) + eye_aspect_ratio(right_eye)) / 2.0
+                ear = round(ear, 3)
+                data_store["EAR"] = ear
 
                 # MAR calculation for yawning detection
                 mouth = landmarks[MOUTH]
                 mar = mouth_aspect_ratio(mouth)
+                mar = round(mar, 3)
+                data_store["MAR"] = mar
+
+                # sending data to frontend
+                data = {"EAR": ear, "MAR": mar}
+                socketio.emit("update_data", data)
 
                 # detecting drowsiness
                 if ear < 0.3:  # threshold
