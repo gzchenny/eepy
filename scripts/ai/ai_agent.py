@@ -9,6 +9,12 @@ import os
 import json
 import stt_tts
 
+"""
+TDL
+- set up voice activation and deactivation
+- connect AI with fatigue level
+- make AI cleaner 
+"""
 load_dotenv()
 
 # Define the response schema using Pydantic BaseModel
