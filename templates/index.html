@@ -25,5 +25,17 @@
 <body>
     <h1>EEPY</h1>
     <img src="{{ url_for('video_feed') }}" alt="Video Stream">
+    <p>Latest Value: <span id="data">Waiting for data...</span></p>
+
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script> <!-- Include Socket.IO library -->
+    <script>
+        var socket = io(); // Connect to WebSocket
+
+        socket.on("update_data", function(data) {
+            console.log("Received data:", data); // Log received data to console
+            document.getElementById("data").innerText = data.value;
+        });
+    </script>
+
 </body>
 </html>
