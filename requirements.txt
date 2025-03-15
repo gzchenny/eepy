@@ -3,6 +3,11 @@ opencv-python
 pyttsx3
 dlib
 scipy
-python-dotenv
-flask
-flask-socketio
+pydantic
+langchain-openai
+langchain-core
+langchain
+langchain-community
+openai
+speechrecognition
+pygame
