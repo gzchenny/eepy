@@ -11,7 +11,6 @@ import stt_tts
 
 """
 TDL
-- set up voice activation and deactivation
 - connect AI with fatigue level
 - make AI cleaner 
 """
@@ -21,9 +20,6 @@ load_dotenv()
 class ResearchResponse(BaseModel):
     topic: str
     summary: str
-    sources: list[str]
-    tools_used: list[str]
-
 
 # Function to initialise AI Agent
 def initialise_agent():
@@ -46,9 +42,9 @@ def initialise_agent():
             (
                 "system",
                 """
-                You are a research assistant that will help generate a research paper.
-                Answer the user query and use neccessary tools. 
-                Wrap the output in this format and provide no other text\n{format_instructions}
+                You are sitting in the passenger seat of a car. 
+                The driver will talk to you so just make light conversation with them. 
+                Make sure they're driving safe. \n{format_instructions}
                 """,
             ),
             ("placeholder", "{chat_history}"),
@@ -66,7 +62,6 @@ def initialise_agent():
         prompt=prompt,
         tools=tools
     )
-
     return agent, tools
 
 # Function to process the AI response
@@ -91,18 +86,22 @@ def main():
    # Initialize the agent and tools
     agent, tools = initialise_agent()
     
-    stt_tts.output_audio("Hey! How are you doing today?")
+    # Voice activation
+    active = False
+    wake_word = "hey"
+    detected_text = stt_tts.record_audio()
+    if detected_text and wake_word in detected_text.lower():
+        active = True
+        stt_tts.output_audio("Hey!")
 
-    while True:
+    # main loop 
+    while active:
         # Create an executor to run the agent with the tools
         agent_executor = AgentExecutor(agent=agent, tools=tools)
 
         # Use speech-to-text to get the user's query
         query = stt_tts.record_audio()
-        if not query:
-            print("No input detected. Please try again.")
-            continue
-        elif query == "exit":
+        if not query or query == "bye":
             stt_tts.output_audio("Goodbye!")
             break
 
@@ -116,6 +115,8 @@ def main():
 
             # Convert the summary to speech using text-to-speech
             stt_tts.output_audio(summary)
+
+    active = False
 
 if __name__ == "__main__":
     main()

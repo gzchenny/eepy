@@ -11,3 +11,5 @@ langchain-community
 openai
 speechrecognition
 pygame
+pyaudio
+dotenv

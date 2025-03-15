@@ -1,5 +1,4 @@
 import speech_recognition as sr
-import pyttsx3
 import requests
 import tempfile
 import pygame
@@ -15,7 +14,7 @@ def record_audio():
         # connect user mic and listen to audio
         with sr.Microphone() as source:
             r.adjust_for_ambient_noise(source, duration=0.2)
-            audio = r.listen(source, timeout=2)
+            audio = r.listen(source, timeout=5)
             
             try:
                 # Converting user audio to text using google 
@@ -25,7 +24,9 @@ def record_audio():
                 print("Error: ", e)
                 return None
 
-
+"""
+source: https://www.youtube.com/watch?v=3BMy5KPa_kQ 
+"""
 API_KEY = "sk_2a4636131ac359403267066a77a5142a16aa3f934dc63a87"
 DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"
 
