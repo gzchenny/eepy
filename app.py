@@ -34,11 +34,11 @@ def mouth_aspect_ratio(mouth):
     return (A + B) / (2.0 * C)
 
 # Video streaming generator function
+blink_count = 0
+yawn_count = 0
+
 def generate_frames():
     cap = cv2.VideoCapture(0)
-    blink_count = 0
-    yawn_count = 0
-
     while True:
         success, frame = cap.read()
         if not success:
