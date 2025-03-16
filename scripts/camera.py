@@ -3,6 +3,8 @@ import dlib
 import numpy as np
 from scipy.spatial import distance
 from flask_socketio import SocketIO
+import time
+from collections import deque  # leetcode finally being useful!!!
 
 socketio = SocketIO()
 ### to do
@@ -68,6 +70,11 @@ yawn_count = 0
 def generate_frames():
     global blink_count, yawn_count
     cap = cv2.VideoCapture(0)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_window = int(fps * 5)  # Number of frames in the last minute
+    blink_scores = deque(maxlen=frame_window)
+    yawn_scores = deque(maxlen=frame_window)
+    
     while True:
         success, frame = cap.read()
         if not success:
@@ -111,10 +118,31 @@ def generate_frames():
 
                 # detecting drowsiness
                 if ear < 0.3:  # threshold
+                    blink_scores.append(1)
+                else:
+                    blink_scores.append(0)
+                    
+                if mar > 0.6:  # threshold
+                    yawn_scores.append(1)
+                else:
+                    yawn_scores.append(0)
+                    
+                if len(blink_scores) >= frame_window:
+                    blink_scores.popleft()
+                if len(yawn_scores) >= frame_window:
+                    yawn_scores.popleft()
+                    
+                blink_score = sum(blink_scores)
+                yawn_score = sum(yawn_scores)
+                print(f' Len blink scores {len(blink_scores)}')
+                print(f' len yawn scores {len(yawn_scores)}')
+                print(f'Blink Score: {blink_score}')
+                print(f'Yawn Score: {yawn_score}')
+                
+                if ear < 0.3:  # threshold
                     blink_count += 1
-                    if blink_count > 15:  # ADJUST THIS
+                    if blink_count > 10:  # ADJUST THIS
                         cv2.putText(frame, "DROWSY! Wake up!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
-
                 else:
                     blink_count = 0
 
@@ -125,6 +153,12 @@ def generate_frames():
                         cv2.putText(frame, "Yawning! Take a break!", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
                 else:
                     yawn_count = 0
+
+                # Display warnings based on the scores
+                if blink_score > frame_window * 0.5:  # Adjust threshold as needed
+                    cv2.putText(frame, "DROWSINESS", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
+                if yawn_score > frame_window * 0.3:  # Adjust threshold as needed
+                    cv2.putText(frame, "DROWSINESS 2", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
 
                 # drawing landmarks
                 for (x, y) in landmarks:

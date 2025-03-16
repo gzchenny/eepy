@@ -24,7 +24,7 @@ def get_data():
 def generate_data():
     while True:
         data = {"EAR": round(data_store["EAR"], 3), "MAR": round(data_store["MAR"], 3)}  # GET MORE DATA
-        print("Emitting data:", data)
+        # print("Emitting data:", data)
         socketio.emit("update_data", data)
         time.sleep(1)
 
