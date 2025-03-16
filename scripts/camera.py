@@ -4,8 +4,6 @@ import numpy as np
 from scipy.spatial import distance
 from flask_socketio import SocketIO
 
-import time
-from collections import deque  # leetcode finally being useful!!!
 
 socketio = SocketIO()
 ### to do
@@ -47,7 +45,6 @@ MOUTH = [48, 50, 52, 54, 56, 58]
 data_store = {
     "EAR": 0,
     "MAR": 0,
-    "is_drowsy": False,
 }
 
 # function to calculate Eye Aspect Ratio (EAR)
@@ -68,15 +65,12 @@ def mouth_aspect_ratio(mouth):
 
 blink_count = 0
 yawn_count = 0
+frame_counter = 0
+update_frequency = 15  # Update UI every 15 frames
 
 def generate_frames():
-    global blink_count, yawn_count, drowsy_frame_count
+    global blink_count, yawn_count
     cap = cv2.VideoCapture(0)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    frame_window = int(fps * 5)  # Number of frames in the last minute
-    blink_scores = deque(maxlen=frame_window)
-    yawn_scores = deque(maxlen=frame_window)
-    
     while True:
         success, frame = cap.read()
         if not success:
@@ -115,34 +109,16 @@ def generate_frames():
                 mar = round(mar, 3)
                 data_store["MAR"] = mar
 
+                # sending data to frontend
+                data = {"EAR": ear, "MAR": mar}
+                socketio.emit("update_data", data)
+
                 # detecting drowsiness
                 if ear < 0.3:  # threshold
-                    blink_scores.append(1)
-                else:
-                    blink_scores.append(0)
-                    
-                if mar > 0.6:  # threshold
-                    yawn_scores.append(1)
-                else:
-                    yawn_scores.append(0)
-                    
-                if len(blink_scores) >= frame_window:
-                    blink_scores.popleft()
-                if len(yawn_scores) >= frame_window:
-                    yawn_scores.popleft()
-                    
-                blink_score = sum(blink_scores)
-                yawn_score = sum(yawn_scores)
-                drowsiness_score = blink_score * 0.7 + yawn_score * 0.3
-                print(f'len(blink_scores) {len(blink_scores)}')
-                print(f'len(yawn_scores) {len(yawn_scores)}')
-                print(f'Blink Score: {blink_score}')
-                print(f'Yawn Score: {yawn_score}')
-                
-                if ear < 0.3:  # threshold
                     blink_count += 1
-                    if blink_count > 10:      # ADJUST THIS
+                    if blink_count > 15:  # ADJUST THIS
                         cv2.putText(frame, "DROWSY! Wake up!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
+
                 else:
                     blink_count = 0
 
@@ -153,28 +129,6 @@ def generate_frames():
                         cv2.putText(frame, "Yawning! Take a break!", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
                 else:
                     yawn_count = 0
-
-                # display warnings based on the scores
-                if blink_score > frame_window * 0.5:  # Adjust threshold as needed
-                    cv2.putText(frame, "TOO MUCH BLINKING", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
-                if yawn_score > frame_window * 0.3:  # Adjust threshold as needed
-                    cv2.putText(frame, "TOO MUCH YAWNING", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
-                
-                if drowsiness_score > frame_window * 0.5:  # ADJUST
-                    cv2.putText(frame, "DROWSINESS", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 4)
-                    data_store["is_drowsy"] = True
-                    drowsy_frame_count += 1
-                else:
-                    if drowsy_frame_count > 140:  # ADJUSTABLE
-                        is_drowsy = False
-                        drowsy_frame_count = 0
-
-                print(f'Drowsiness Score: {drowsiness_score}')
-                print(f'is_drowsy: {data_store["is_drowsy"]}')
-                
-                # sending data to frontend
-                data = {"EAR": ear, "MAR": mar, "is_drowsy": data_store["is_drowsy"]}
-                socketio.emit("update_data", data)
 
                 # drawing landmarks
                 for (x, y) in landmarks:

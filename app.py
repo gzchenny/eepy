@@ -8,7 +8,7 @@ app = Flask(__name__)
 #socketio = SocketIO(app, cors_allowed_origins="*")  # Allow cross-origin for testing
 socketio.init_app(app, cors_allowed_origins="*")
 
-data_store = {"EAR": 0, "MAR": 0, "is_drowsy": False}
+data_store = {"EAR": 0, "MAR": 0}
 
 
 # Route for video streaming
@@ -28,12 +28,8 @@ def home():
 
 def generate_data():
     while True:
-        data = {
-            "EAR": round(data_store["EAR"], 3),
-            "MAR": round(data_store["MAR"], 3),
-            "is_drowsy": data_store["is_drowsy"]
-        }
-        # print("Emitting data:", data)
+        data = {"EAR": round(data_store["EAR"], 3), "MAR": round(data_store["MAR"], 3)}  # GET MORE DATA
+        print("Emitting data:", data)
         socketio.emit("update_data", data)
         time.sleep(1)
 
