@@ -36,10 +36,15 @@ thread = threading.Thread(target=generate_data)
 thread.daemon = True
 thread.start()
 
-# Route for home page
+# Route for index page
 @app.route('/')
 def index():
     return render_template('index.html')
+
+# Route for home page
+@app.route('/home')
+def home():
+    return render_template('home.html')
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5001, debug=True)
