@@ -12,4 +12,6 @@ openai
 speechrecognition
 pygame
 pyaudio
-dotenv
+python-dotenv
+requests
+duckduckgo_search

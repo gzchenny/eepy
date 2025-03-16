@@ -46,6 +46,7 @@ MOUTH = [48, 50, 52, 54, 56, 58]
 data_store = {
     "EAR": 0,
     "MAR": 0,
+    "is_drowsy": False,
 }
 
 # function to calculate Eye Aspect Ratio (EAR)
@@ -112,10 +113,6 @@ def generate_frames():
                 mar = round(mar, 3)
                 data_store["MAR"] = mar
 
-                # sending data to frontend
-                data = {"EAR": ear, "MAR": mar}
-                socketio.emit("update_data", data)
-
                 # detecting drowsiness
                 if ear < 0.3:  # threshold
                     blink_scores.append(1)
@@ -135,14 +132,14 @@ def generate_frames():
                 blink_score = sum(blink_scores)
                 yawn_score = sum(yawn_scores)
                 drowsiness_score = blink_score * 0.7 + yawn_score * 0.3
-                print(f' Len blink scores {len(blink_scores)}')
-                print(f' len yawn scores {len(yawn_scores)}')
+                print(f'len(blink_scores) {len(blink_scores)}')
+                print(f'len(yawn_scores) {len(yawn_scores)}')
                 print(f'Blink Score: {blink_score}')
                 print(f'Yawn Score: {yawn_score}')
                 
                 if ear < 0.3:  # threshold
                     blink_count += 1
-                    if blink_count > 10:  # ADJUST THIS
+                    if blink_count > 10:      # ADJUST THIS
                         cv2.putText(frame, "DROWSY! Wake up!", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
                 else:
                     blink_count = 0
@@ -162,6 +159,15 @@ def generate_frames():
                     cv2.putText(frame, "TOO MUCH YAWNING", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
                 if drowsiness_score > frame_window * 0.5:  # ADJUST
                     cv2.putText(frame, "DROWSINESS", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 4)
+                    data_store["is_drowsy"] = True
+                else:
+                    data_store["is_drowsy"] = False
+                print(f'Drowsiness Score: {drowsiness_score}')
+                print(f'is_drowsy: {data_store["is_drowsy"]}')
+                
+                # sending data to frontend
+                data = {"EAR": ear, "MAR": mar, "is_drowsy": data_store["is_drowsy"]}
+                socketio.emit("update_data", data)
 
                 # drawing landmarks
                 for (x, y) in landmarks:
