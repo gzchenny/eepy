@@ -4,6 +4,7 @@ import numpy as np
 from scipy.spatial import distance
 from flask_socketio import SocketIO
 
+
 socketio = SocketIO()
 ### to do
 # CALIBRATION !!!!!!!!!!!!!!!!
@@ -64,6 +65,8 @@ def mouth_aspect_ratio(mouth):
 
 blink_count = 0
 yawn_count = 0
+frame_counter = 0
+update_frequency = 15  # Update UI every 15 frames
 
 def generate_frames():
     global blink_count, yawn_count
@@ -73,6 +76,7 @@ def generate_frames():
         if not success:
             break
 
+        # frame_counter += 1
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # convert frame to grayscale
         h, w = frame.shape[:2]
 
@@ -130,6 +134,11 @@ def generate_frames():
                 for (x, y) in landmarks:
                     cv2.circle(frame, (x, y), 1, (0, 255, 0), -1)
 
+        # if frame_counter >= update_frequency:
+        #     data = {"EAR": ear, "MAR": mar}
+        #     socketio.emit("update_data", data)
+        #     frame_counter = 0
+        
         # converting frame to bytes for streaming
         _, buffer = cv2.imencode('.jpg', frame)
         frame_bytes = buffer.tobytes()

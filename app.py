@@ -21,6 +21,11 @@ def video_feed():
 def get_data():
     return jsonify(data_store)
 
+# Route to home page
+@app.route('/home')
+def home():
+    return render_template('home.html')
+
 def generate_data():
     while True:
         data = {"EAR": round(data_store["EAR"], 3), "MAR": round(data_store["MAR"], 3)}  # GET MORE DATA
