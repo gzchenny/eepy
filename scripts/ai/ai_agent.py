@@ -4,9 +4,9 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain.agents import create_tool_calling_agent, AgentExecutor
-from tools import search_tool, wiki_tool
+from scripts.ai.tools import search_tool, wiki_tool  # Updated import path
+from scripts.ai.stt_tts import record_audio, output_audio  # Updated import path
 import os
-import stt_tts
 
 """
 TDL
@@ -69,44 +69,27 @@ def process_response(raw_response):
         return None
 
 # Runs the main AI functionality after activation
-def run_ai(agent, tools):
+def run_ai(agent, tools, query):
     # Ensure agent and tools are initialized
     if not agent or not tools:
         print("Error: Agent initialization failed. Exiting AI loop.")
-        return
-    
-    
+        return "Error: Agent initialization failed."
+
     # Create an executor to run the agent with the tools
     agent_executor = AgentExecutor(agent=agent, tools=tools)
     chat_history = []
 
-    # Words to deactivate the AI
-    deactivate_words = ["bye", "goodbye", "later"]
+    # Record user query and chat history
+    chat_history.append({"role": "user", "content": query})
+    raw_response = agent_executor.invoke({"query": query, "chat_history": chat_history})
+    chat_history.append({"role": "assistant", "content": raw_response.get("output")})
 
-    while True:
-        query = stt_tts.record_audio()
-
-        # Record user query and chat history
-        if query:
-            chat_history.append({"role": "user", "content": query})
-            raw_response = agent_executor.invoke({"query": query, "chat_history": chat_history})
-            chat_history.append({"role": "assistant", "content": raw_response.get("output")})
-        elif not query:
-            print("Error: Failed to record audio. Please try again.")
-            continue
-
-        # Check if the user wants to exit
-        if any(word in query.lower() for word in deactivate_words):
-            stt_tts.output_audio("Goodbye!")
-            break
-
-        # Process the response
-        summary = process_response(raw_response)
-        if summary:
-            print(f"User Query: {query}")
-            print(f"AI Response: {summary}")
-            # Convert the summary to speech using text-to-speech
-            stt_tts.output_audio(summary)
+    # Process the response
+    summary = process_response(raw_response)
+    if summary:
+        return summary
+    else:
+        return "Error processing response."
 
 # Function to listen for the activation word
 def listen_for_activation():
@@ -116,12 +99,12 @@ def listen_for_activation():
     # Keep listening for the activation word
     while True:
         print("Listening for activation...")
-        detected_text = stt_tts.record_audio()
+        detected_text = record_audio()
         print(f"Detected text: {detected_text}")
 
         # activation word detected
         if any(word in detected_text.lower() for word in activate_words):
-            stt_tts.output_audio("Hey!")
+            output_audio("Hey!")
             return True
         
         print("Activation word not detected. Waiting...")
@@ -131,7 +114,7 @@ def listen_for_activation():
 def fatigue_level(agent, tools, avg_fatigue):
     # run AI if fatigue level is high
     if avg_fatigue > 0.5:
-        stt_tts.output_audio("You seem tired. Do you want to chat?")
+        output_audio("You seem tired. Do you want to chat?")
         run_ai(agent, tools)
 """
 

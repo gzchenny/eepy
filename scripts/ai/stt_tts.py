@@ -4,37 +4,35 @@ import tempfile
 import pygame
 import os
 
-#----------------- Speech to text -----------------#
-# Initialise the recognizer
-r = sr.Recognizer()
+#----------------- Speech to Text -----------------#
+# Initialize the recognizer
+recognizer = sr.Recognizer()
 
 # Function to record audio and convert it to text
 def record_audio():
-    # loop indefinitely until the user stops yapping
-    while(1):
-        # connect user mic and listen to audio
-        with sr.Microphone() as source:
-            r.adjust_for_ambient_noise(source, duration=0.2)
-            audio = r.listen(source)
-            
-            try:
-                # Converting user audio to text using google 
-                text = r.recognize_google(audio)
-                return text
-            except Exception as e:
-                print("Error: ", e)
-                return None
-
+    with sr.Microphone() as source:
+        recognizer.adjust_for_ambient_noise(source, duration=0.2)
+        print("Listening...")
+        audio = recognizer.listen(source)
+        
+        try:
+            # Converting user audio to text using Google Speech Recognition
+            text = recognizer.recognize_google(audio)
+            print(f"Recognized: {text}")
+            return text
+        except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand audio")
+            return ""
+        except sr.RequestError as e:
+            print(f"Could not request results from Google Speech Recognition service; {e}")
+            return ""
 
 #----------------- Text to Speech -----------------#
-"""
-source: https://www.youtube.com/watch?v=3BMy5KPa_kQ 
-"""
 API_KEY = "sk_2a4636131ac359403267066a77a5142a16aa3f934dc63a87"
 DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"
 
 def play_audio(file_path):
-    # Plays audio through pytgame
+    # Plays audio through pygame
     try:
         pygame.mixer.init()
         pygame.mixer.music.load(file_path)
@@ -84,7 +82,6 @@ def output_audio(text):
             # Save the audio to the temporary file
             with open(temp_filename, "wb") as f:
                 f.write(response.content)
-            
             
             # Play the audio
             play_audio(temp_filename)

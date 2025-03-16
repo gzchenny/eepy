@@ -83,6 +83,16 @@
         .value-label {
             margin-right: 5px;
         }
+        .ai-container {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        .ai-response {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #FFF;
+        }
     </style>
 </head>
 <body>
@@ -104,6 +114,11 @@
                 <span class="value-label">Drowsy:</span>
                 <span id="drowsy_value">Waiting for data...</span>
             </div>
+        </div>
+        <div class="ai-container">
+            <input type="text" id="ai_query" placeholder="Ask the AI...">
+            <button onclick="sendQuery()">Send</button>
+            <div class="ai-response" id="ai_response">AI Response will appear here...</div>
         </div>
     </div>
 
@@ -133,6 +148,23 @@
 
         // 1000 = 1 second
         setInterval(requestData, 1000);
+
+        // Function to send query to AI
+        function sendQuery() {
+            const query = document.getElementById("ai_query").value;
+            fetch('/ai_query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("ai_response").innerText = data.response;
+            })
+            .catch(error => console.error('Error:', error));
+        }
     </script>
 
 </body>

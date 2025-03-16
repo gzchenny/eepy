@@ -1,6 +1,7 @@
-from flask import Flask, render_template, Response, jsonify
+from flask import Flask, render_template, Response, jsonify, request
 from scripts.camera import generate_frames, data_store, socketio
 from flask_socketio import SocketIO
+from scripts.ai.ai_agent import initialise_agent, run_ai
 import time
 import threading
 
@@ -10,6 +11,17 @@ socketio.init_app(app, cors_allowed_origins="*")
 
 data_store = {"EAR": 0, "MAR": 0, "is_drowsy": False}
 
+agent, tools = initialise_agent()
+
+@app.route('/ai_query', methods=['POST'])
+def ai_query():
+    query = request.json.get('query')
+    if not query:
+        return jsonify({"error": "No query provided"}), 400
+
+    # Run the AI agent with the provided query
+    response = run_ai(agent, tools, query)
+    return jsonify({"response": response})
 
 # Route for video streaming
 @app.route('/video_feed')
