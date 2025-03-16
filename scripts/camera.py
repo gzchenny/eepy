@@ -67,9 +67,10 @@ def mouth_aspect_ratio(mouth):
 
 blink_count = 0
 yawn_count = 0
+drowsy_frame_count = 0  # counter to track the number of frames since is_drowsy was set to True
 
 def generate_frames():
-    global blink_count, yawn_count
+    global blink_count, yawn_count, drowsy_frame_count
     cap = cv2.VideoCapture(0)
     fps = cap.get(cv2.CAP_PROP_FPS)
     frame_window = int(fps * 5)  # Number of frames in the last minute
@@ -157,11 +158,16 @@ def generate_frames():
                     cv2.putText(frame, "TOO MUCH BLINKING", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
                 if yawn_score > frame_window * 0.3:  # Adjust threshold as needed
                     cv2.putText(frame, "TOO MUCH YAWNING", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
+                
                 if drowsiness_score > frame_window * 0.5:  # ADJUST
                     cv2.putText(frame, "DROWSINESS", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 4)
                     data_store["is_drowsy"] = True
+                    drowsy_frame_count += 1
                 else:
-                    data_store["is_drowsy"] = False
+                    if drowsy_frame_count > 140:  # ADJUSTABLE
+                        is_drowsy = False
+                        drowsy_frame_count = 0
+
                 print(f'Drowsiness Score: {drowsiness_score}')
                 print(f'is_drowsy: {data_store["is_drowsy"]}')
                 
