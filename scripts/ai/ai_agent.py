@@ -86,19 +86,24 @@ def run_ai(agent, tools):
     # Create an executor to run the agent with the tools
     agent_executor = AgentExecutor(agent=agent, tools=tools)
 
+    chat_history = []
     while True:
-        # Use speech-to-text to get the user's query
         query = stt_tts.record_audio()
 
+        # Record user query and chat history
+        if query:
+            chat_history.append({"role": "user", "content": query})
+            raw_response = agent_executor.invoke({"query": query, "chat_history": chat_history})
+            chat_history.append({"role": "assistant", "content": raw_response.get("output")})
+
         # Check if the user wants to exit
-        if not query or query.lower() == "bye":
+        deactivate_words = ["bye", "goodbye", "later"]
+        if any(word in query.lower() for word in deactivate_words):
             stt_tts.output_audio("Goodbye!")
             break
         else:
-            print(query) 
-
-        # Invoke the AI agent with the user's query
-        raw_response = agent_executor.invoke({"query": query})
+            # display the query 
+            print(query)
 
         # Process the response
         summary = process_response(raw_response)
@@ -112,8 +117,8 @@ def main():
     # Initialize the agent and tools
     agent, tools = initialise_agent()
 
-    # Wake word for activation
-    wake_word = "hey"
+    # Word for activation
+    activate_words = ["hey", "hello", "hi", "yo", "hey jit"]
 
     while True:    
         #if avg_fatigue < x:
@@ -124,11 +129,12 @@ def main():
         print(f"Detected text: {detected_text}")  
 
         # Check if the wake word is detected
-        if detected_text and wake_word in detected_text.lower():
+        if detected_text and any(activate_word in detected_text.lower() for activate_word in activate_words):
             stt_tts.output_audio("Hey!")
-            run_ai(agent, tools)  # Activate the AI
+            # Activate the AI
+            run_ai(agent, tools)  
         else:
-            print("Wake word not detected. Please try again.")
+            print("Activate word not detected. Please try again.")
 
 #def save_lives():
     # wake up, talk to jit by saying hey
