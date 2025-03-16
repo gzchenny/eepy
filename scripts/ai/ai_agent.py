@@ -9,11 +9,6 @@ import os
 import json
 import scripts.ai.stt_tts
 
-"""
-TDL
-- connect AI with fatigue level
-"""
-
 load_dotenv()
 
 # Define the response schema using Pydantic BaseModel
@@ -39,14 +34,7 @@ def initialise_agent():
     # Chat Prompt template
     prompt = ChatPromptTemplate.from_messages(
         [
-            (
-                "system",
-                """
-                "You are a helpful assistant sitting in the passenger seat of a car. 
-                Your job is to make light conversation with the driver. 
-                Keep your sentences short and sweet." \n{format_instructions}
-                """,
-            ),
+            ("system", "You are a helpful AI assistant. Keep responses concise.\n{format_instructions}"),
             ("placeholder", "{chat_history}"),
             ("human", "{query}"),
             ("placeholder", "{agent_scratchpad}"),
@@ -67,30 +55,35 @@ def initialise_agent():
 # Function to process the AI response
 def process_response(raw_response):
     try:
-        # Parse the JSON string into a Python dictionary
+        # Extract the output string from the raw response
         output_str = raw_response.get("output")
-        output_dict = json.loads(output_str)
-
-        # Create the Pydantic model from the dictionary
-        structured_response = ResearchResponse(**output_dict)
-
-        # Return the summary
-        return structured_response.summary
+        
+        # Parse the output string into the ResearchResponse model and return the summary
+        return ResearchResponse.parse_raw(output_str).summary
     except Exception as e:
-        print("Error parsing response:", e)
-        print("Raw Response:", raw_response)
-        return None
+        # Print the error and raw response for debugging
+        print(f"Error parsing response: {e}")
+        print(f"Raw Response: {raw_response}")
+        
+        # Return an error message if parsing fails
+        return "Sorry, I couldn't process the response."
+
+ai_response = "AI RESPONSE"
 
 # Runs the main AI functionality after activation
 def run_ai(agent, tools):
+    global ai_response  # Add this line to modify the global variable
     # Create an executor to run the agent with the tools
     agent_executor = AgentExecutor(agent=agent, tools=tools)
-
     chat_history = []
+    
     while True:
         query = scripts.ai.stt_tts.record_audio()
 
         # Record user query and chat history
+        if query == None:
+            continue
+        
         if query:
             chat_history.append({"role": "user", "content": query})
             raw_response = agent_executor.invoke({"query": query, "chat_history": chat_history})
@@ -101,17 +94,15 @@ def run_ai(agent, tools):
         if any(word in query.lower() for word in deactivate_words):
             scripts.ai.stt_tts.output_audio("Goodbye!")
             break
-        else:
-            # display the query 
-            print(query)
 
         # Process the response
-        summary = process_response(raw_response)
-        if summary:
-            print(f"Summary: {summary}")
+        ai_response = process_response(raw_response)
+        if ai_response:
+            print(f"User Query: {query}")
+            print(f"ai_response: {ai_response}")
 
-            # Convert the summary to speech using text-to-speech
-            scripts.ai.stt_tts.output_audio(summary)
+            # Convert the ai_response to speech using text-to-speech
+            scripts.ai.stt_tts.output_audio(ai_response)
 
 def main():
     # Initialize the agent and tools
@@ -121,9 +112,6 @@ def main():
     activate_words = ["hey", "hello", "hi", "yo", "hey jit"]
 
     while True:    
-        #if avg_fatigue < x:
-           # save_lives()
-
         print("Listening for activation...")
         detected_text = scripts.ai.stt_tts.record_audio()
         print(f"Detected text: {detected_text}")  
@@ -135,10 +123,6 @@ def main():
             run_ai(agent, tools)  
         else:
             print("Activate word not detected. Please try again.")
-
-#def save_lives():
-    # wake up, talk to jit by saying hey
-    #jkljlk
 
 if __name__ == "__main__":
     main()
