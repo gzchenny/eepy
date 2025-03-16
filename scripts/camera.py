@@ -134,6 +134,7 @@ def generate_frames():
                     
                 blink_score = sum(blink_scores)
                 yawn_score = sum(yawn_scores)
+                drowsiness_score = blink_score * 0.7 + yawn_score * 0.3
                 print(f' Len blink scores {len(blink_scores)}')
                 print(f' len yawn scores {len(yawn_scores)}')
                 print(f'Blink Score: {blink_score}')
@@ -154,11 +155,13 @@ def generate_frames():
                 else:
                     yawn_count = 0
 
-                # Display warnings based on the scores
+                # display warnings based on the scores
                 if blink_score > frame_window * 0.5:  # Adjust threshold as needed
-                    cv2.putText(frame, "DROWSINESS", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
+                    cv2.putText(frame, "TOO MUCH BLINKING", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
                 if yawn_score > frame_window * 0.3:  # Adjust threshold as needed
-                    cv2.putText(frame, "DROWSINESS 2", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
+                    cv2.putText(frame, "TOO MUCH YAWNING", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
+                if drowsiness_score > frame_window * 0.5:  # ADJUST
+                    cv2.putText(frame, "DROWSINESS", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 4)
 
                 # drawing landmarks
                 for (x, y) in landmarks:
