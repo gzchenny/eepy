@@ -54,7 +54,7 @@
             width: 100%;
             max-width: 800px;
         }
-        .ear-value, .mar-value {
+        .ear-value, .mar-value, .drowsy-value {
             -webkit-text-stroke-width: 1px;
             -webkit-text-stroke-color: #FFF;
             font-family: 'Poppins';
@@ -68,6 +68,11 @@
         }
         .mar-value {
             text-align: right;
+            font-size: 24px;
+            color: #FFF;
+        }
+        .drowsy-value {
+            text-align: center;
             font-size: 24px;
             color: #FFF;
         }
@@ -95,6 +100,10 @@
                 <span class="value-label">Latest MAR Value:</span>
                 <span id="mar_value">Waiting for data...</span>
             </div>
+            <div class="value-container drowsy-value">
+                <span class="value-label">Drowsy:</span>
+                <span id="drowsy_value">Waiting for data...</span>
+            </div>
         </div>
     </div>
 
@@ -106,6 +115,7 @@
             console.log("Received data:", data); // Log received data to console
             document.getElementById("ear_value").innerText = data.EAR;
             document.getElementById("mar_value").innerText = data.MAR;
+            document.getElementById("drowsy_value").innerText = data.is_drowsy ? "Yes" : "No";
         });
 
         // function to request data from the /data endpoint
@@ -116,6 +126,7 @@
                     console.log("Fetched data:", data); // Log fetched data to console
                     document.getElementById("ear_value").innerText = data.EAR;
                     document.getElementById("mar_value").innerText = data.MAR;
+                    document.getElementById("drowsy_value").innerText = data.is_drowsy ? "Yes" : "No";
                 })
                 .catch(error => console.error('Error fetching data:', error));
         }
