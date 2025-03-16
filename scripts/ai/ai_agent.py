@@ -4,10 +4,10 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain.agents import create_tool_calling_agent, AgentExecutor
-from tools import search_tool, wiki_tool
+from scripts.ai.tools import search_tool, wiki_tool
 import os
 import json
-import stt_tts
+import scripts.ai.stt_tts
 
 """
 TDL
@@ -30,7 +30,7 @@ def initialise_agent():
 
     # Initialize the language model
     llm = ChatOpenAI(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         api_key=api_key
     )
     # Define a parser to convert the AI's output into the Pydantic model
@@ -88,7 +88,7 @@ def run_ai(agent, tools):
 
     chat_history = []
     while True:
-        query = stt_tts.record_audio()
+        query = scripts.ai.stt_tts.record_audio()
 
         # Record user query and chat history
         if query:
@@ -99,7 +99,7 @@ def run_ai(agent, tools):
         # Check if the user wants to exit
         deactivate_words = ["bye", "goodbye", "later"]
         if any(word in query.lower() for word in deactivate_words):
-            stt_tts.output_audio("Goodbye!")
+            scripts.ai.stt_tts.output_audio("Goodbye!")
             break
         else:
             # display the query 
@@ -111,7 +111,7 @@ def run_ai(agent, tools):
             print(f"Summary: {summary}")
 
             # Convert the summary to speech using text-to-speech
-            stt_tts.output_audio(summary)
+            scripts.ai.stt_tts.output_audio(summary)
 
 def main():
     # Initialize the agent and tools
@@ -125,12 +125,12 @@ def main():
            # save_lives()
 
         print("Listening for activation...")
-        detected_text = stt_tts.record_audio()
+        detected_text = scripts.ai.stt_tts.record_audio()
         print(f"Detected text: {detected_text}")  
 
         # Check if the wake word is detected
         if detected_text and any(activate_word in detected_text.lower() for activate_word in activate_words):
-            stt_tts.output_audio("Hey!")
+            scripts.ai.stt_tts.output_audio("Hey!")
             # Activate the AI
             run_ai(agent, tools)  
         else:

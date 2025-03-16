@@ -160,7 +160,7 @@ def generate_frames():
                 #     cv2.putText(frame, "TOO MUCH YAWNING", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 4)
                 
                 if drowsiness_score > frame_window * 0.5:  # ADJUST
-                    cv2.putText(frame, "DROWSINESS", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 4)
+                    # cv2.putText(frame, "DROWSINESS", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 4)
                     data_store["is_drowsy"] = True
                     drowsy_frame_count += 1
                 else:
@@ -168,8 +168,8 @@ def generate_frames():
                         is_drowsy = False
                         drowsy_frame_count = 0
 
-                print(f'Drowsiness Score: {drowsiness_score}')
-                print(f'is_drowsy: {data_store["is_drowsy"]}')
+                # print(f'Drowsiness Score: {drowsiness_score}')
+                # print(f'is_drowsy: {data_store["is_drowsy"]}')
                 
                 # sending data to frontend
                 data = {"EAR": ear, "MAR": mar, "is_drowsy": data_store["is_drowsy"]}
